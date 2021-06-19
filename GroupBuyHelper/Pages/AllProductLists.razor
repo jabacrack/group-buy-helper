@@ -1,0 +1,36 @@
+﻿@page "/alllists"
+@attribute [Authorize]
+@using GroupBuyHelper.Services
+@using Microsoft.EntityFrameworkCore.Infrastructure
+@using GroupBuyHelper.Dtos
+@inject ProductService productService
+
+<h3>All Lists</h3>
+
+
+<div class="d-flex flex-column">
+    @foreach (var list in lists)
+    {
+        var link = $"list/{list.Id}";
+        var linkTotal = $"list/{list.Id}/total";
+    <div class="d-flex flex-row border">
+        <NavLink class="nav-link" href="@link">
+            @list.Name
+        </NavLink>
+
+        <NavLink class="nav-link" href="@linkTotal">
+            Total
+        </NavLink>
+    </div>
+    }
+</div>
+
+@code {
+
+    private ProductListInfo[] lists;
+
+    protected override async Task OnInitializedAsync()
+    {
+        lists = await productService.GetAllProductLists();
+    }
+}

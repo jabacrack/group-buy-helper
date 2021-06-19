@@ -1,0 +1,30 @@
+﻿@page "/importlist"
+@attribute [Authorize]
+
+@using GroupBuyHelper.Services
+@using GroupBuyHelper.Data
+
+@inject ProductService productsService
+@inject UserService userService
+
+<h3>Import</h3>
+<div class="d-flex flex-column">
+    <input placeholder="Name" @bind="name" />
+    <textarea placeholder="Items" @bind="items" ></textarea>
+    <button class="btn btn-primary" @onclick="AddList">Add List</button>
+</div>
+
+
+
+
+
+@code {
+    private string name;
+    private string items;
+
+    private async Task AddList()
+    {
+        ApplicationUser currentUser = await userService.GetCurrentUser();
+        await productsService.AddList(currentUser, name, items, ",", "€");
+    }
+}

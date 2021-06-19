@@ -1,0 +1,63 @@
+﻿@page "/list/{id:int}"
+@attribute [Authorize]
+@using GroupBuyHelper.Services
+@using GroupBuyHelper.Dtos
+@using GroupBuyHelper.Data
+@inject ProductService productService
+@inject UserService userService
+
+<h3>List</h3>
+<div class="d-flex flex-column"></div>
+<table class="table flex-fill">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Price</th>
+            <th scope="col">Select</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var product in products)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.Amount</td>
+                <td>@product.Price</td>
+            <td><input value="@GetAmount(product.Id)" @onchange="@((ChangeEventArgs e) => { var _ = int.TryParse(e.Value?.ToString(), out var result) ? selectedProducts[product.Id] = result : 0; })"></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-primary" @onclick="@(async () => await SubmitOrder())">Submit</button>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ProductInfo[] products;
+    private Dictionary<int, int> selectedProducts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApplicationUser currentUser = await userService.GetCurrentUser();
+        selectedProducts = await productService.GetUserOrder(currentUser, Id);
+        products = await productService.GetProducts(Id);
+    }
+
+    private async Task SubmitOrder()
+    {
+        ApplicationUser currentUser = await userService.GetCurrentUser();
+        await productService.SetUserOrder(currentUser, Id, selectedProducts);
+    }
+
+    private int? GetAmount(int productId)
+    {
+        if (selectedProducts.TryGetValue(productId, out var amount))
+            return amount;
+
+        return null;
+    }
+}
