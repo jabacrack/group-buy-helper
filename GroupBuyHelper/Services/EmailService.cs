@@ -4,8 +4,6 @@ using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using SendGrid;
-using SendGrid.Helpers.Mail;
 
 namespace GroupBuyHelper.Services
 {

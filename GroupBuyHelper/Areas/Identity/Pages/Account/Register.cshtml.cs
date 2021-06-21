@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using GroupBuyHelper.Data;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,7 @@ namespace GroupBuyHelper.Areas.Identity.Pages.Account
         private readonly UserManager<ApplicationUser> userManager;
         private readonly ILogger<RegisterModel> logger;
         private readonly IEmailSender emailSender;
+        private readonly string inviteValue = "D81A6ABD-5F1D-4DB1-82AD-AF29105BF623";
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
@@ -35,6 +37,9 @@ namespace GroupBuyHelper.Areas.Identity.Pages.Account
             this.logger = logger;
             this.emailSender = emailSender;
         }
+
+        // [Parameter]
+        // public string Invite { get; set; }
 
         [BindProperty]
         public InputModel Input { get; set; }
@@ -66,14 +71,24 @@ namespace GroupBuyHelper.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = null, [FromRoute]string invite = null)
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            if (inviteValue != invite)
+            {
+                ModelState.AddModelError(string.Empty, "Registration restricted.");
+            }
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null, [FromRoute] string invite = null)
         {
+            if (inviteValue != invite)
+            {
+                ModelState.AddModelError(string.Empty, "Registration restricted.");
+            }
+
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
