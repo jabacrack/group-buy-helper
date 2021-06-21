@@ -1,18 +1,10 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using GroupBuyHelper.Areas.Identity;
 using GroupBuyHelper.Data;
 using GroupBuyHelper.Services;
@@ -51,7 +43,6 @@ namespace GroupBuyHelper
             services.AddTransient<IEmailSender, EmailService>();
             services.Configure<EmailSenderOptions>(Configuration.GetSection("Email"));
 
-            services.AddSingleton<WeatherForecastService>();
             services.AddScoped<ProductService>();
             services.AddScoped<UserService>();
         }
