@@ -28,7 +28,19 @@ namespace GroupBuyHelper
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<ApplicationUser>(options =>
+                {
+                    // Default Password settings.
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequiredLength = 6;
+                    options.Password.RequiredUniqueChars = 6;
+
+                    options.SignIn.RequireConfirmedAccount = true;
+
+                })
                 .AddEntityFrameworkStores<ApplicationContext>();
 
             services.AddRazorPages();
