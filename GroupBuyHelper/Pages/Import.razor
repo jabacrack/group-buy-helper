@@ -3,28 +3,54 @@
 
 @using GroupBuyHelper.Services
 @using GroupBuyHelper.Data
+@using GroupBuyHelper.Dtos
 
 @inject ProductService productsService
 @inject UserService userService
 
 <h3>Import</h3>
-<div class="d-flex flex-column">
-    <input placeholder="Name" @bind="name" />
-    <textarea placeholder="Items" @bind="items" ></textarea>
-    <button class="btn btn-primary" @onclick="AddList">Add List</button>
-</div>
+<form>
+    <div class="d-flex flex-column">
+        <EditForm Model="importRequest" OnValidSubmit="AddList">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="d-flex flex-row">
+                <label>
+                    Name
+                    <InputText @bind-Value="importRequest.Name" />
+                </label>
+                <label>
+                    Columns separator
+                    <InputText DisplayName="Columns separator" @bind-Value="importRequest.ColumnSeparator" />
+                </label>
+                <label>
+                    Number separator
+                    <InputText DisplayName="Number separator" @bind-Value="importRequest.NumberSeparator" />
+                </label>
+                <label>
+                    Currency symbol
+                    <InputText DisplayName="Currency symbol" @bind-Value="importRequest.CurrencySymbol" />
+                </label>
+            </div>
+            @* <InputTextArea @bind="validationResult"/> *@
+            <InputTextArea placeholder="Items" @bind-Value="importRequest.Items" />
+            <button type="submit">Add List</button>
+        </EditForm>
+    </div>
+</form>
 
 
 
 
 
 @code {
-    private string name;
-    private string items;
+    
+    private ImportRequest importRequest = new ImportRequest() {ColumnSeparator = "\t", NumberSeparator = ","};
 
     private async Task AddList()
     {
         ApplicationUser currentUser = await userService.GetCurrentUser();
-        await productsService.AddList(currentUser, name, items, ",", "€");
+        await productsService.AddList(currentUser, importRequest);
     }
 }
