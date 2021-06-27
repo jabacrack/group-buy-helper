@@ -10,34 +10,27 @@
 
 <h3>Import</h3>
 <form>
-    <div class="d-flex flex-column">
+    
         <EditForm Model="importRequest" OnValidSubmit="AddList">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <div class="d-flex flex-row">
-                <label>
-                    Name
-                    <InputText @bind-Value="importRequest.Name" />
-                </label>
-                <label>
-                    Columns separator
-                    <InputText DisplayName="Columns separator" @bind-Value="importRequest.ColumnSeparator" />
-                </label>
-                <label>
-                    Number separator
-                    <InputText DisplayName="Number separator" @bind-Value="importRequest.NumberSeparator" />
-                </label>
-                <label>
-                    Currency symbol
-                    <InputText DisplayName="Currency symbol" @bind-Value="importRequest.CurrencySymbol" />
-                </label>
+            <div class="d-flex flex-row flex-nowrap">
+                <label for="importName">Name</label>
+                <InputText id="importName" class="form-control form-control-sm" @bind-Value="importRequest.Name" />
+                <label for="importColumnsSeparator">Columns separator</label>
+                <InputText id="importColumnsSeparator" class="form-control form-control-sm" DisplayName="Columns separator" @bind-Value="importRequest.ColumnSeparator" />
+                <label for="importNumberSeparator">Number separator</label>
+                <InputText id="importNumberSeparator" class="form-control form-control-sm" DisplayName="Number separator" @bind-Value="importRequest.NumberSeparator" />
+                <label for="importCurrencySymbol">Currency symbol</label>
+                <InputText id="importCurrencySymbol" class="form-control form-control-sm" DisplayName="Currency symbol" @bind-Value="importRequest.CurrencySymbol" />
             </div>
-            @* <InputTextArea @bind="validationResult"/> *@
-            <InputTextArea placeholder="Items" @bind-Value="importRequest.Items" />
+            <InputTextArea @bind-Value="validationResult"/>
+            <InputTextArea class="col" placeholder="Items" @bind-Value="importRequest.Items" />
             <button type="submit">Add List</button>
+
         </EditForm>
-    </div>
+    
 </form>
 
 
@@ -47,10 +40,14 @@
 @code {
     
     private ImportRequest importRequest = new ImportRequest() {ColumnSeparator = "\t", NumberSeparator = ","};
+    private string validationResult;
 
     private async Task AddList()
     {
+        validationResult = string.Empty;
         ApplicationUser currentUser = await userService.GetCurrentUser();
-        await productsService.AddList(currentUser, importRequest);
+        var validations = await productsService.AddList(currentUser, importRequest);
+        if (validations.Any())
+            validationResult = string.Join("\n", validations);
     }
 }
