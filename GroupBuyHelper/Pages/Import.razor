@@ -9,45 +9,49 @@
 @inject UserService userService
 
 <h3>Import</h3>
-<form>
-    
-        <EditForm Model="importRequest" OnValidSubmit="AddList">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
 
-            <div class="d-flex flex-row flex-nowrap">
-                <label for="importName">Name</label>
-                <InputText id="importName" class="form-control form-control-sm" @bind-Value="importRequest.Name" />
-                <label for="importColumnsSeparator">Columns separator</label>
-                <InputText id="importColumnsSeparator" class="form-control form-control-sm" DisplayName="Columns separator" @bind-Value="importRequest.ColumnSeparator" />
-                <label for="importNumberSeparator">Number separator</label>
-                <InputText id="importNumberSeparator" class="form-control form-control-sm" DisplayName="Number separator" @bind-Value="importRequest.NumberSeparator" />
-                <label for="importCurrencySymbol">Currency symbol</label>
-                <InputText id="importCurrencySymbol" class="form-control form-control-sm" DisplayName="Currency symbol" @bind-Value="importRequest.CurrencySymbol" />
-            </div>
-            <InputTextArea @bind-Value="validationResult"/>
-            <InputTextArea class="col" placeholder="Items" @bind-Value="importRequest.Items" />
-            <button type="submit">Add List</button>
-
-        </EditForm>
-    
-</form>
-
-
-
+<EditForm Model="importRequest" OnValidSubmit="AddList">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div class="d-flex flex-column">
+        <div class="d-flex flex-row">
+            <label for="importName" class="form-control-sm text-nowrap">Name</label>
+            <InputText id="importName" class="form-control form-control-sm" @bind-Value="importRequest.Name" />
+            <label for="importColumnsSeparator" class="form-control-sm text-nowrap">Columns separator</label>
+            <InputText id="importColumnsSeparator" class="form-control form-control-sm" DisplayName="Columns separator" @bind-Value="importRequest.ColumnSeparator" />
+            <label for="importNumberSeparator" class="form-control-sm text-nowrap">Number separator</label>
+            <InputText id="importNumberSeparator" class="form-control form-control-sm" DisplayName="Number separator" @bind-Value="importRequest.NumberSeparator" />
+            <label for="importCurrencySymbol" class="form-control-sm text-nowrap">Currency symbol</label>
+            <InputText id="importCurrencySymbol" class="form-control form-control-sm" DisplayName="Currency symbol" @bind-Value="importRequest.CurrencySymbol" />
+        </div>
+        @* <div class="d-flex flex-row"> *@
+        @* *@
+        @* </div> *@
+        @* <div class="d-flex flex-row"> *@
+        @* *@
+        @* </div> *@
+        <label class="form-control-sm text-nowrap">Items</label>
+        <InputTextArea class="form-control form-control-sm" placeholder="Items" @bind-Value="importRequest.Items" />
+        <label class="form-control-sm text-nowrap">Validation</label>
+        <InputTextArea readonly class="form-control form-control-sm" @bind-Value="validationResult" />
+        <button type="submit" class="btn btn-primary align-self-start">Add List</button>
+    </div>
+</EditForm>
 
 
 @code {
-    
-    private ImportRequest importRequest = new ImportRequest() {ColumnSeparator = "\t", NumberSeparator = ","};
+
+    private ImportRequest importRequest = new ImportRequest() {ColumnSeparator = "\\t", NumberSeparator = ",", CurrencySymbol = "€" };
     private string validationResult;
 
     private async Task AddList()
     {
         validationResult = string.Empty;
         ApplicationUser currentUser = await userService.GetCurrentUser();
+
         var validations = await productsService.AddList(currentUser, importRequest);
         if (validations.Any())
             validationResult = string.Join("\n", validations);
     }
+
 }

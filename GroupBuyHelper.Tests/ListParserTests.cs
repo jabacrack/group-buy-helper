@@ -119,14 +119,15 @@ namespace GroupBuyHelper.Tests
         }
 
         [Theory]
-        [InlineData("\t")]
-        [InlineData(";")]
-        [InlineData("|")]
-        public void DifferentColumnSeparators(string separator)
+        [InlineData("\t", "\t")]
+        [InlineData("\\t", "\t")]
+        [InlineData(";", ";")]
+        [InlineData("|", "|")]
+        public void DifferentColumnSeparators(string separator, string realSeparator)
         {
             var text = GetString(
-                $"Name 1{separator}20{separator}2,5",
-                $"Name 2{separator}35{separator}1,02"
+                $"Name 1{realSeparator}20{realSeparator}2,5",
+                $"Name 2{realSeparator}35{realSeparator}1,02"
             );
 
             var parser = new ListParser(separator, ",", "");

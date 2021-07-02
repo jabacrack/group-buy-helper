@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using GroupBuyHelper.Data;
@@ -17,14 +18,17 @@ namespace GroupBuyHelper.Services
                                             NumberStyles.AllowLeadingWhite |
                                             NumberStyles.AllowTrailingWhite;
 
-        public ListParser(string columnSeparator, string numberSeparator, string currencySymbol)
+        public ListParser([NotNull]string columnSeparator, [NotNull]string numberSeparator, string currencySymbol)
         {
+            if (columnSeparator == "\\t")
+                columnSeparator = "\t";
+
             this.columnSeparator = columnSeparator;
 
             numberFormat = (NumberFormatInfo) CultureInfo.InvariantCulture.NumberFormat.Clone();
             numberFormat.NumberDecimalSeparator = numberSeparator;
             numberFormat.CurrencyDecimalSeparator = numberSeparator;
-            numberFormat.CurrencySymbol = currencySymbol;
+            numberFormat.CurrencySymbol = currencySymbol ?? string.Empty;
         }
 
         public Product[] Parse(string data, out IList<string> validations)
