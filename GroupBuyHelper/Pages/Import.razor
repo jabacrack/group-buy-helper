@@ -34,7 +34,7 @@
         <InputTextArea class="form-control form-control-sm" placeholder="Items" @bind-Value="importRequest.Items" />
         <label class="form-control-sm text-nowrap">Validation</label>
         <InputTextArea readonly class="form-control form-control-sm" @bind-Value="validationResult" />
-        <button type="submit" class="btn btn-primary align-self-start">Add List</button>
+        <button type="submit" class="btn btn-primary align-self-start btn">Add List</button>
     </div>
 </EditForm>
 
@@ -43,6 +43,7 @@
 
     private ImportRequest importRequest = new ImportRequest() {ColumnSeparator = "\\t", NumberSeparator = ",", CurrencySymbol = "€" };
     private string validationResult;
+    private bool isSubmitDisabled = false;
 
     private async Task AddList()
     {
@@ -51,7 +52,12 @@
 
         var validations = await productsService.AddList(currentUser, importRequest);
         if (validations.Any())
+        {
             validationResult = string.Join("\n", validations);
+            return;
+        }
+
+        importRequest.Items = string.Empty;
     }
 
 }

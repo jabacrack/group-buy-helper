@@ -38,7 +38,7 @@ namespace GroupBuyHelper
                     options.Password.RequiredLength = 6;
                     options.Password.RequiredUniqueChars = 6;
 
-                    options.SignIn.RequireConfirmedAccount = true;
+                    options.SignIn.RequireConfirmedAccount = false;
 
                 })
                 .AddEntityFrameworkStores<ApplicationContext>();
