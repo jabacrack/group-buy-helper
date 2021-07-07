@@ -1,23 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using GroupBuyHelper.Data;
 using GroupBuyHelper.Services;
-using Microsoft.EntityFrameworkCore;
-using NSubstitute;
 using Xunit;
 
 namespace GroupBuyHelper.Tests
 {
     public class ListParserTests
     {
-        private Product[] defaultProducts = new []
+        private readonly Product[] defaultProducts = 
         {
-            new Product{Name = "Name 1", Amount = 20, Price = 2.5},
-            new Product{Name = "Name 2", Amount = 35, Price = 1.02}
+            new() {Name = "Name 1", Amount = 20, Price = 2.5},
+            new() {Name = "Name 2", Amount = 35, Price = 1.02}
         };
 
-        private IEqualityComparer<Product> comparer = new ProductComparer();
+        private readonly IEqualityComparer<Product> comparer = new ProductComparer();
 
         class ProductComparer : IEqualityComparer<Product>
         {
@@ -35,16 +32,7 @@ namespace GroupBuyHelper.Tests
                 return HashCode.Combine(obj.Name, obj.Price, obj.Amount);
             }
         }
-
-        public ListParserTests()
-        {
-            // var options = new DbContextOptionsBuilder<ApplicationContext>()
-            //     .UseInMemoryDatabase(databaseName: "DB")
-            //     .Options;
-            //
-            // productService = new ProductService(new ApplicationContext(options));
-        }
-
+        
 
         [Fact]
         public void OneColumn()
@@ -113,7 +101,7 @@ namespace GroupBuyHelper.Tests
             );
 
             var parser = new ListParser(";", ",", "");
-            Product[] products = parser.Parse(text, out var validations);
+            parser.Parse(text, out var validations);
 
             Assert.Equal(2, validations.Count);
         }
@@ -165,7 +153,7 @@ namespace GroupBuyHelper.Tests
             );
 
             var parser = new ListParser(";", ".", "");
-            Product[] products = parser.Parse(text, out var validations);
+            parser.Parse(text, out var validations);
 
             Assert.Equal(2, validations.Count);
         }
@@ -182,7 +170,7 @@ namespace GroupBuyHelper.Tests
                 $"Name 2;35;{price2}"
             );
 
-            var parser = new ListParser(";", ".", "$");
+            var parser = new ListParser(";", ".", "$    ");
             Product[] products = parser.Parse(text, out var validations);
 
             Assert.Equal(2, products.Length);
@@ -194,12 +182,12 @@ namespace GroupBuyHelper.Tests
         public void WrongCurrencySymbol()
         {
             var text = GetString(
-                $"Name 1;20;2.5$",
-                $"Name 2;35;1.02$"
+                "Name 1;20;2.5$",
+                "Name 2;35;1.02$"
             );
 
             var parser = new ListParser(";", ".", "%");
-            Product[] products = parser.Parse(text, out var validations);
+            parser.Parse(text, out var validations);
 
             Assert.Equal(2, validations.Count);
         }
@@ -208,12 +196,12 @@ namespace GroupBuyHelper.Tests
         public void NoCurrencySymbol()
         {
             var text = GetString(
-                $"Name 1;20;2.5$",
-                $"Name 2;35;1.02$"
+                "Name 1;20;2.5$",
+                "Name 2;35;1.02$"
             );
 
             var parser = new ListParser(";", ".", "");
-            Product[] products = parser.Parse(text, out var validations);
+            parser.Parse(text, out var validations);
 
             Assert.NotEmpty(validations);
             Assert.Equal(2, validations.Count);
@@ -237,9 +225,9 @@ namespace GroupBuyHelper.Tests
 
 
 
-        private string GetString(params string[] strs)
+        private string GetString(params string[] strings)
         {
-            return string.Join("\n", strs);
+            return string.Join("\n", strings);
         }
     }
 }
