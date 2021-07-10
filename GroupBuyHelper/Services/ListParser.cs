@@ -1,18 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using GroupBuyHelper.Data;
-using Array = System.Array;
 
 namespace GroupBuyHelper.Services
 {
     public class ListParser
     {
-        private const string WindowsStringEnd = "\n";
+        private static readonly Regex amountPatternRegex = new("^(\\d+)\\D*.*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        // private readonly Regex pricePatternRegex;
+        private static readonly string windowsStringEnd = "\n";
 
         private readonly string columnSeparator;
-        private NumberFormatInfo numberFormat;
+        private readonly NumberFormatInfo numberFormat;
         private NumberStyles numberStyles = NumberStyles.AllowCurrencySymbol |
                                             NumberStyles.AllowDecimalPoint |
                                             NumberStyles.AllowLeadingWhite |
@@ -28,7 +31,13 @@ namespace GroupBuyHelper.Services
             numberFormat = (NumberFormatInfo) CultureInfo.InvariantCulture.NumberFormat.Clone();
             numberFormat.NumberDecimalSeparator = numberSeparator;
             numberFormat.CurrencyDecimalSeparator = numberSeparator;
-            numberFormat.CurrencySymbol = currencySymbol ?? string.Empty;
+            numberFormat.CurrencySymbol = (currencySymbol ?? string.Empty).Trim();
+
+            // var currencySymbolPart = string.IsNullOrEmpty(numberFormat.CurrencySymbol)
+            //     ? string.Empty
+            //     : $"\\{currencySymbol}?";
+            // var pricePattern = $"(^{currencySymbolPart}\\s*[\\d{numberSeparator}]+\\s*{currencySymbolPart}).*";
+            // pricePatternRegex = new Regex(pricePattern, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         }
 
         public Product[] Parse(string data, out IList<string> validations)
@@ -36,7 +45,7 @@ namespace GroupBuyHelper.Services
             validations = new List<string>();
 
             string[][] values = data
-                .Trim().Split(WindowsStringEnd).Select(line =>
+                .Trim().Split(windowsStringEnd).Select(line =>
                     line.Trim().Split(columnSeparator).Select(value => value.Trim()).ToArray()).ToArray();
 
             ValidateStructure(values, validations);
@@ -64,10 +73,13 @@ namespace GroupBuyHelper.Services
                 0 => null,
                 1 => new Product {Name = values[0]},
                 2 => new Product {Name = values[0], Price = ParsePriceValue(row, values[1], validations)},
+                3 => new Product {Name = values[0], Amount = ParseAmountValue(row, values[1], validations), Price = ParsePriceValue(row, values[2], validations)},
                 _ => new Product
                 {
-                    Name = values[0], Amount = ParseAmountValue(row, values[1], validations),
-                    Price = ParsePriceValue(row, values[2], validations)
+                    Name = values[0],
+                    Description = values[1],
+                    Amount = ParseAmountValue(row, values[2], validations),
+                    Price = ParsePriceValue(row, values[3], validations)
                 },
             };
         }
@@ -93,7 +105,7 @@ namespace GroupBuyHelper.Services
                 }
             }
 
-            var unsupportedColumnNumber = groups.Where(group => group.Key > 3).ToArray();
+            var unsupportedColumnNumber = groups.Where(group => group.Key > 4).ToArray();
 
             if (unsupportedColumnNumber.Any())
             {
@@ -101,7 +113,7 @@ namespace GroupBuyHelper.Services
                 {
                     foreach (var groupValues in group)
                     {
-                        validations.Add($"Line {groupValues.Row} contains more than 3 columns.");
+                        validations.Add($"Line {groupValues.Row} contains more than 4 columns.");
                     }
                 }
             }
@@ -109,20 +121,31 @@ namespace GroupBuyHelper.Services
 
         private double ParsePriceValue(int row, string str, IList<string> validations)
         {
-            if (double.TryParse(str, numberStyles, numberFormat, out double result))
+            // var valueStr = pricePatternRegex.Match(str).Groups[1].Value;
+            var valueStr = str;
+
+            if (double.TryParse(valueStr, numberStyles, numberFormat, out double result))
                 return result;
 
             validations.Add($"Value {str} cannot be parsed as price in row {row}.");
             return default;
         }
 
+
         private int ParseAmountValue(int row, string str, IList<string> validations)
         {
-            if (int.TryParse(str, out int result))
+            var valueStr = amountPatternRegex.Match(str).Groups[1].Value;
+
+            if (int.TryParse(valueStr, out int result))
                 return result;
 
             validations.Add($"Value {str} cannot be parsed as amount in row {row}.");
             return default;
+        }
+
+        private Product ParseProductWithDescriptions(string[] values, IList<string> validations)
+        {
+            return new Product();
         }
     }
 }

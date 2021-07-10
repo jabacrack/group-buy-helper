@@ -12,9 +12,9 @@ namespace GroupBuyHelper.Tests
 {
     public class ProductsListTests : IClassFixture<DatabaseFixture>, IDisposable
     {
-        ProductService productService;
-        ApplicationContext applicationContext;
-        DbContextOptions<ApplicationContext> options;
+        readonly ProductService productService;
+        readonly ApplicationContext applicationContext;
+        readonly DbContextOptions<ApplicationContext> options;
 
         public ProductsListTests(DatabaseFixture fixture)
         {

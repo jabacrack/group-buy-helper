@@ -8,21 +8,91 @@
 @inject ProductService productsService
 @inject UserService userService
 
-<h3>Import</h3>
+<h3>Импорт нового заказа</h3>
+
+<button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#help" aria-expanded="false" aria-controls="help">
+    Помощь
+</button>
+<div class="collapse mt-2 mb-2" id="help">
+    <div class="card card-body">
+        <p>Импорт поддерживает списки с 1, 2, 3 или 4 колонками.</p>
+        <p>
+            <h4>Одна колонка</h4>
+            <table class="table flex-fill table-bordered">
+                <tbody>
+                <tr>
+                    <td>Название</td>
+                </tr>
+                </tbody>
+            </table>
+        </p>
+        <p>
+            <h4>Две колонки</h4>
+            <table class="table flex-fill table-bordered">
+                <tbody>
+                <tr>
+                    <td>Название</td>
+                    <td>Цена</td>
+                </tr>
+                </tbody>
+            </table>
+        </p>
+        <p>
+            <h4>Три колонки</h4>
+            <table class="table flex-fill table-bordered">
+                <tbody>
+                <tr>
+                    <td>Название</td>
+                    <td>Количество</td>
+                    <td>Цена</td>
+                </tr>
+                </tbody>
+            </table>
+        </p>
+        <p>
+            <h4>Четыре колонки</h4>
+            <table class="table flex-fill table-bordered">
+                <tbody>
+                <tr>
+                    <td>Название</td>
+                    <td>Описание</td>
+                    <td>Количество</td>
+                    <td>Цена</td>
+                </tr>
+                </tbody>
+            </table>
+        </p>
+        <p>
+            <h4>Формат колонок</h4>
+            <p><strong>Название</strong> - любая строка, должно быть обязательно.</p>
+            <p><strong>Описание</strong> - любая строка, может отсутствовать.</p>
+            <p><strong>Количество</strong> - Целое число. После числа могут идти пробелы или текст, они будут проигнорированы. Примеры валидных значений: "20", "20seeds", "20 seeds".</p>
+            <p><strong>Цена</strong> - Дробное или целое число. Может содержать символ валюты, но не обязательно. Но если будет содержать другие символы парсинг не пройдет. Целая часть отделяется от дробной
+                символом из поля "Разделитель целой и дробной части числа". Примеры значений для валюты "$" и разделителя ",": "2,5", "2,5$", "2,5 $", "$2,5", "$ 2,5".</p>
+        </p>
+        <p>
+            <h4>Параметры импорта</h4>
+            <p><strong>Имя</strong> - имя заказа. Обязателен.</p>
+            <p><strong>Разделитель колонок</strong> - символ отделяющий одну колонку от другой. \t - обозначает табуляцию. Пробел нельзя использовать как разделитель. Обязателен.</p>
+            <p><strong>Разделитель целой и дробной части числа</strong> - отделяет дробную от целой части числа, используется при парсинге цены. Обязателен.</p>
+            <p><strong>Символ валюты</strong> - символ валюты, используется при парсинге цены, обязателен, если встречается в цене.</p>
+        </p>
+    </div>
+</div>
 
 <EditForm Model="importRequest" OnValidSubmit="AddList">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
     <div class="d-flex flex-column">
         <div class="d-flex flex-row">
-            <label for="importName" class="form-control-sm text-nowrap">Name</label>
-            <InputText id="importName" class="form-control form-control-sm" @bind-Value="importRequest.Name" />
-            <label for="importColumnsSeparator" class="form-control-sm text-nowrap">Columns separator</label>
-            <InputText id="importColumnsSeparator" class="form-control form-control-sm" DisplayName="Columns separator" @bind-Value="importRequest.ColumnSeparator" />
-            <label for="importNumberSeparator" class="form-control-sm text-nowrap">Number separator</label>
-            <InputText id="importNumberSeparator" class="form-control form-control-sm" DisplayName="Number separator" @bind-Value="importRequest.NumberSeparator" />
-            <label for="importCurrencySymbol" class="form-control-sm text-nowrap">Currency symbol</label>
-            <InputText id="importCurrencySymbol" class="form-control form-control-sm" DisplayName="Currency symbol" @bind-Value="importRequest.CurrencySymbol" />
+            <label for="importName" class="form-control-sm text-nowrap">Имя заказа</label>
+            <InputText id="importName" class="form-control form-control-sm" @bind-Value="importRequest.Name"/>
+            <label for="importColumnsSeparator" class="form-control-sm text-nowrap">Разделитель колонок</label>
+            <InputText id="importColumnsSeparator" class="form-control form-control-sm" DisplayName="Разделитель колонок" @bind-Value="importRequest.ColumnSeparator"/>
+            <label for="importNumberSeparator" class="form-control-sm text-nowrap">Разделитель целой и дробной части числа</label>
+            <InputText id="importNumberSeparator" class="form-control form-control-sm" DisplayName="Разделитель целой и дробной части числа" @bind-Value="importRequest.NumberSeparator"/>
+            <label for="importCurrencySymbol" class="form-control-sm text-nowrap">Символ валюты</label>
+            <InputText id="importCurrencySymbol" class="form-control form-control-sm" DisplayName="Символ валюты" @bind-Value="importRequest.CurrencySymbol"/>
         </div>
         @* <div class="d-flex flex-row"> *@
         @* *@
@@ -30,18 +100,18 @@
         @* <div class="d-flex flex-row"> *@
         @* *@
         @* </div> *@
-        <label class="form-control-sm text-nowrap">Items</label>
-        <InputTextArea class="form-control form-control-sm" placeholder="Items" @bind-Value="importRequest.Items" />
-        <label class="form-control-sm text-nowrap">Validation</label>
-        <InputTextArea readonly class="form-control form-control-sm" @bind-Value="validationResult" />
-        <button type="submit" class="btn btn-primary align-self-start btn">Add List</button>
+        <label class="form-control-sm text-nowrap">Вставьте список для парсинга сюда</label>
+        <InputTextArea class="form-control form-control-sm" @bind-Value="importRequest.Items"/>
+        <label class="form-control-sm text-nowrap">Валидация</label>
+        <InputTextArea readonly class="form-control form-control-sm" @bind-Value="validationResult"/>
+        <button type="submit" class="btn btn-primary align-self-start btn mt-1">Добавить заказ</button>
     </div>
 </EditForm>
 
 
 @code {
 
-    private ImportRequest importRequest = new ImportRequest() {ColumnSeparator = "\\t", NumberSeparator = ",", CurrencySymbol = "€" };
+    private ImportRequest importRequest = new ImportRequest() {ColumnSeparator = "\\t", NumberSeparator = ",", CurrencySymbol = "€"};
     private string validationResult;
     private bool isSubmitDisabled = false;
 

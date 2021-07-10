@@ -92,6 +92,63 @@ namespace GroupBuyHelper.Tests
             Assert.Equal(defaultProducts, products, comparer);
         }
 
+        // [Theory]
+        // [InlineData("2,5")]
+        // [InlineData("2,5$")]
+        // [InlineData("2,5 $")]
+        // [InlineData("2,5   $")]
+        // [InlineData("2,5 $ asd")]
+        // [InlineData("2,5 $ 3")]
+        // [InlineData("$2,5")]
+        // [InlineData("$ 2,5")]
+        // [InlineData("$   2,5")]
+        // [InlineData("$ 2,5 asd")]
+        // [InlineData("$ 2,5 3")]
+        // public void PriceFormatWithCurrencySymbol(string price)
+        // {
+        //     var text = $"Name 1;20;{price}";
+        //
+        //     var parser = new ListParser(";", ",", "$");
+        //     Product[] products = parser.Parse(text, out var validations);
+        //
+        //     Assert.Single(products);
+        //     Assert.Empty(validations);
+        //     Assert.Equal(defaultProducts[0], products[0], comparer);
+        // }
+
+        [Fact]
+        public void PriceFormatWithOutCurrencySymbol()
+        {
+            var text = $"Name 1;20;2,5";
+
+            var parser = new ListParser(";", ",", "");
+            Product[] products = parser.Parse(text, out var validations);
+
+            Assert.Single(products);
+            Assert.Empty(validations);
+            Assert.Equal(defaultProducts[0], products[0], comparer);
+        }
+
+        [Theory]
+        [InlineData("20 seeds")]
+        [InlineData("20seeds")]
+        [InlineData("20")]
+        [InlineData("20seeds3")]
+        [InlineData("20 seeds3")]
+        [InlineData("20 seeds 3")]
+        [InlineData("20 3")]
+        public void AmountWithText(string amount)
+        {
+            var text = $"Name 1;{amount};2,5";
+
+            var parser = new ListParser(";", ",", "");
+            Product[] products = parser.Parse(text, out var validations);
+
+            Assert.Single(products);
+            Assert.Empty(validations);
+            Assert.Equal(defaultProducts[0], products[0], comparer);
+        }
+
         [Fact]
         public void TooManyColumns()
         {
@@ -160,7 +217,11 @@ namespace GroupBuyHelper.Tests
 
         [Theory]
         [InlineData("2.5$", "1.02$")]
+        [InlineData("2.5 $", "1.02 $")]
+        [InlineData("2.5  $", "1.02  $")]
         [InlineData("$2.5", "$1.02")]
+        [InlineData("$ 2.5", "$ 1.02")]
+        [InlineData("$  2.5", "$  1.02")]
         [InlineData("$2.5", "1.02$")]
         [InlineData("$2.5", "1.02")]
         public void CurrencySymbol(string price1, string price2)
@@ -170,7 +231,7 @@ namespace GroupBuyHelper.Tests
                 $"Name 2;35;{price2}"
             );
 
-            var parser = new ListParser(";", ".", "$    ");
+            var parser = new ListParser(";", ".", "$");
             Product[] products = parser.Parse(text, out var validations);
 
             Assert.Equal(2, products.Length);

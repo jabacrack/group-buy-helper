@@ -6,15 +6,16 @@
 @inject ProductService productService
 @inject UserService userService
 
-<h3>List</h3>
+<h3>Список</h3>
 <div class="d-flex flex-column"></div>
 <table class="table flex-fill">
     <thead>
         <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Amount</th>
-            <th scope="col">Price</th>
-            <th scope="col">Select</th>
+            <th scope="col">Название</th>
+            <th scope="col">Описание</th>
+            <th scope="col">Количество</th>
+            <th scope="col">Цена</th>
+            <th scope="col">Ваш выбор</th>
         </tr>
     </thead>
     <tbody>
@@ -23,6 +24,7 @@
         {
             <tr>
                 <td>@product.Name</td>
+                <td>@product.Description</td>
                 <td>@product.Amount</td>
                 <td>@product.Price</td>
             <td><input value="@GetAmount(product.Id)" @onchange="@((ChangeEventArgs e) => { var _ = int.TryParse(e.Value?.ToString(), out var result) ? selectedProducts[product.Id] = result : 0; })"></td>
@@ -31,7 +33,7 @@
     </tbody>
 </table>
 
-<button class="btn btn-primary" @onclick="@(async () => await SubmitOrder())">Submit</button>
+<button class="btn btn-primary" @onclick="@(async () => await SubmitOrder())">Изменить</button>
 
 @code {
     [Parameter]

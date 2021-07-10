@@ -25,7 +25,7 @@ namespace GroupBuyHelper.Services
         public async Task<ProductInfo[]> GetProducts(int productsListId)
         {
             var list = await applicationContext.ProductLists.Include(l => l.Products).FirstAsync(x => x.Id == productsListId);
-            return list.Products.Select(x => new ProductInfo(x.Id, x.Name, x.Price, x.Amount)).ToArray();
+            return list.Products.Select(x => new ProductInfo(x.Id, x.Name, x.Description, x.Price, x.Amount)).ToArray();
         }
 
         public async Task<Dictionary<int, int>> GetProductTotal(int productsListId)
