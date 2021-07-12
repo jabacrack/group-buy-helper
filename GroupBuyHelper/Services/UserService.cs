@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace GroupBuyHelper.Services
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly ApplicationContext applicationContext;

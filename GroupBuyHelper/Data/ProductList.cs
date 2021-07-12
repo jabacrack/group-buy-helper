@@ -7,6 +7,7 @@ namespace GroupBuyHelper.Data
         public int Id { get; set; }
         public ApplicationUser Owner { get; set; }
         public ICollection<Product> Products { get; set; }
+        public ICollection<UserOrderItem> OrderItems { get; set; }
 
         public string Name { get; set; }
         public bool Closed { get; set; }

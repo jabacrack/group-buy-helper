@@ -5,21 +5,27 @@ using System.Threading.Tasks;
 using GroupBuyHelper.Data;
 using GroupBuyHelper.Dtos;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Math.EC.Rfc7748;
 
 namespace GroupBuyHelper.Services
 {
     public class ProductService
     {
         private readonly ApplicationContext applicationContext;
-        
-        public ProductService(ApplicationContext applicationContext)
+        private readonly IUserService userService;
+
+        public ProductService(ApplicationContext applicationContext, IUserService userService)
         {
             this.applicationContext = applicationContext;
+            this.userService = userService;
         }
 
         public async Task<ProductListInfo[]> GetAllProductLists()
         {
-            return await applicationContext.ProductLists.Select(p => new ProductListInfo(p.Id, p.Name)).ToArrayAsync();
+            return await applicationContext.ProductLists
+                .Include(x => x.Owner)
+                .Select(p => new ProductListInfo(p.Id, p.Name, p.Owner.Id))
+                .ToArrayAsync();
         }
 
         public async Task<ProductInfo[]> GetProducts(int productsListId)
@@ -38,7 +44,7 @@ namespace GroupBuyHelper.Services
             return summed;
         }
 
-        public async Task<string[]> AddList(ApplicationUser user, ImportRequest importRequest)
+        public async Task<string[]> AddList(ImportRequest importRequest)
         {
             var parser = new ListParser(columnSeparator: importRequest.ColumnSeparator, numberSeparator: importRequest.NumberSeparator, currencySymbol: importRequest.CurrencySymbol);
             Product[] products = parser.Parse(importRequest.Items, out var validations);
@@ -51,13 +57,34 @@ namespace GroupBuyHelper.Services
                 Name = importRequest.Name,
                 Products = products,
                 Closed = false,
-                Owner = user,
+                Owner = await userService.GetCurrentUser(),
             };
 
             await applicationContext.ProductLists.AddAsync(productList);
             await applicationContext.SaveChangesAsync();
 
             return Array.Empty<string>();
+        }
+
+        public async Task DeleteList(int productsListId)
+        {
+            var list = await applicationContext.ProductLists
+                .Include(x => x.Owner)
+                .Include(x => x.Products)
+                .Include(x => x.OrderItems)
+                .FirstOrDefaultAsync(x => x.Id == productsListId);
+            
+            if (list == null)
+                //TODO add error
+                return;
+
+            var currentUser = await userService.GetCurrentUser();
+            if (list.Owner != currentUser)
+                //TODO add error
+                return;
+
+            applicationContext.ProductLists.Remove(list);
+            await applicationContext.SaveChangesAsync();
         }
 
         public async Task SetUserOrder(ApplicationUser user, int productListId, Dictionary<int, int> orderData)

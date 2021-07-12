@@ -6,7 +6,6 @@
 @using GroupBuyHelper.Dtos
 
 @inject ProductService productsService
-@inject UserService userService
 
 <h3>Импорт нового заказа</h3>
 
@@ -118,9 +117,8 @@
     private async Task AddList()
     {
         validationResult = string.Empty;
-        ApplicationUser currentUser = await userService.GetCurrentUser();
-
-        var validations = await productsService.AddList(currentUser, importRequest);
+        
+        var validations = await productsService.AddList(importRequest);
         if (validations.Any())
         {
             validationResult = string.Join("\n", validations);

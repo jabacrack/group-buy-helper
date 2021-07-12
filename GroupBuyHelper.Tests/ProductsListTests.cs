@@ -14,6 +14,7 @@ namespace GroupBuyHelper.Tests
     {
         readonly ProductService productService;
         readonly ApplicationContext applicationContext;
+        private readonly ApplicationUser user;
         readonly DbContextOptions<ApplicationContext> options;
 
         public ProductsListTests(DatabaseFixture fixture)
@@ -23,7 +24,18 @@ namespace GroupBuyHelper.Tests
             options = fixture.Options;
 
             applicationContext = new ApplicationContext(options);
-            productService = new ProductService(applicationContext);
+
+            user = new ApplicationUser()
+            {
+                UserName = "Test User"
+            };
+            applicationContext.Users.Add(user);
+            applicationContext.SaveChanges();
+
+            IUserService userService = Substitute.For<IUserService>();
+            userService.GetCurrentUser().Returns(Task.FromResult(user));
+
+            productService = new ProductService(applicationContext, userService);
         }
 
         [Fact]
@@ -40,15 +52,10 @@ namespace GroupBuyHelper.Tests
                         "Name 2\t35\t1,02"
             };
 
-            ApplicationUser user = new ApplicationUser()
-            {
-                UserName = "Test User"
-            };
-            await applicationContext.Users.AddAsync(user);
-            await applicationContext.SaveChangesAsync();
+            
 
             //act
-            var validations = await productService.AddList(user, importRequest);
+            var validations = await productService.AddList(importRequest);
 
             //assert
             Assert.Empty(validations);
@@ -84,7 +91,7 @@ namespace GroupBuyHelper.Tests
             await applicationContext.SaveChangesAsync();
             
             //act
-            var validations = await productService.AddList(user, importRequest);
+            var validations = await productService.AddList(importRequest);
             
             //assert
             Assert.Empty(validations);

@@ -3,7 +3,9 @@
 @using GroupBuyHelper.Services
 @using Microsoft.EntityFrameworkCore.Infrastructure
 @using GroupBuyHelper.Dtos
+@using GroupBuyHelper.Data
 @inject ProductService productService
+@inject IUserService userService
 
 <h3>Все заказы</h3>
 
@@ -13,6 +15,7 @@
     {
         var link = $"list/{list.Id}";
         var linkTotal = $"list/{list.Id}/total";
+        var linkDelete = $"list/{list.Id}/total";
     <div class="d-flex flex-row border">
         <NavLink class="nav-link" href="@link">
             @list.Name
@@ -21,6 +24,11 @@
         <NavLink class="nav-link" href="@linkTotal">
             Общее количество
         </NavLink>
+        
+        @if (list.OwnerId == currentUserId)
+        {
+            <button class="btn btn-danger" @onclick="@(async () => await productService.DeleteList(list.Id))">Удалить</button>
+        }
     </div>
     }
 </div>
@@ -28,9 +36,12 @@
 @code {
 
     private ProductListInfo[] lists;
+    private string currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
+        var currentUser = await userService.GetCurrentUser();
+        currentUserId = currentUser.Id;
         lists = await productService.GetAllProductLists();
     }
 }
