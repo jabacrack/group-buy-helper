@@ -9,13 +9,51 @@
 
 <h3>Все заказы</h3>
 
+<button class="btn btn-primary"
+        @onclick="OpenPopup">
+    Add New Forecast
+</button>
+
+@if (showPopup)
+{
+    <!-- This is the popup to create or edit a forecast -->
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Edit Forecast</h3>
+                    <!-- Button to close the popup -->
+                    <button type="button" class="close" @onclick="ClosePopup">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @* <input class="form-control" type="text" *@
+                    @*        placeholder="Celsius forecast" *@
+                    @*        @bind="objWeatherForecast.TemperatureC" /> *@
+                    @* <input class="form-control" type="text" *@
+                    @*        placeholder="Fahrenheit forecast" *@
+                    @*        @bind="objWeatherForecast.TemperatureF" /> *@
+                    @* <input class="form-control" type="text" *@
+                    @*        placeholder="Summary" *@
+                    @*        @bind="objWeatherForecast.Summary" /> *@
+                    @* <br /> *@
+                    @* <!-- Button to save the forecast --> *@
+                    @* <button class="btn btn-primary" *@
+                    @*         @onclick="SaveForecast"> *@
+                    @*     Save *@
+                    @* </button> *@
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <div class="d-flex flex-column">
     @foreach (var list in lists)
     {
         var link = $"list/{list.Id}";
         var linkTotal = $"list/{list.Id}/total";
-        var linkDelete = $"list/{list.Id}/total";
     <div class="d-flex flex-row border">
         <NavLink class="nav-link" href="@link">
             @list.Name
@@ -34,6 +72,19 @@
 </div>
 
 @code {
+
+    bool showPopup = false;
+    void OpenPopup()
+    {
+        // Open the Popup
+        showPopup = true;
+    }
+
+    void ClosePopup()
+    {
+        // Open the Popup
+        showPopup = false;
+    }
 
     private ProductListInfo[] lists;
     private string currentUserId;

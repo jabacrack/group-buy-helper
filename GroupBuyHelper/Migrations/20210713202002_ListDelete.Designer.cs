@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GroupBuyHelper.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20210711210821_AddListDelete")]
-    partial class AddListDelete
+    [Migration("20210713202002_ListDelete")]
+    partial class ListDelete
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -100,17 +100,12 @@ namespace GroupBuyHelper.Migrations
                     b.Property<double?>("Price")
                         .HasColumnType("REAL");
 
-                    b.Property<int>("ProductListId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ProductListId1")
+                    b.Property<int?>("ProductListId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProductListId");
-
-                    b.HasIndex("ProductListId1");
 
                     b.ToTable("Products");
                 });
@@ -146,37 +141,22 @@ namespace GroupBuyHelper.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("OwnerId")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ProductId1")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("ProductListId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ProductListId1")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("OwnerId");
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("ProductId1");
-
                     b.HasIndex("ProductListId");
-
-                    b.HasIndex("ProductListId1");
 
                     b.ToTable("UserOrderItems");
                 });
@@ -316,14 +296,9 @@ namespace GroupBuyHelper.Migrations
             modelBuilder.Entity("GroupBuyHelper.Data.Product", b =>
                 {
                     b.HasOne("GroupBuyHelper.Data.ProductList", "ProductList")
-                        .WithMany()
-                        .HasForeignKey("ProductListId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GroupBuyHelper.Data.ProductList", null)
                         .WithMany("Products")
-                        .HasForeignKey("ProductListId1");
+                        .HasForeignKey("ProductListId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("ProductList");
                 });
@@ -339,34 +314,22 @@ namespace GroupBuyHelper.Migrations
 
             modelBuilder.Entity("GroupBuyHelper.Data.UserOrderItem", b =>
                 {
-                    b.HasOne("GroupBuyHelper.Data.ApplicationUser", null)
-                        .WithMany("Orders")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("GroupBuyHelper.Data.ApplicationUser", "Owner")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("GroupBuyHelper.Data.Product", "Product")
-                        .WithMany()
+                        .WithMany("ConnectedOrderItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GroupBuyHelper.Data.Product", null)
-                        .WithMany("ConnectedOrderItems")
-                        .HasForeignKey("ProductId1");
-
                     b.HasOne("GroupBuyHelper.Data.ProductList", "ProductList")
-                        .WithMany()
+                        .WithMany("OrderItems")
                         .HasForeignKey("ProductListId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("GroupBuyHelper.Data.ProductList", null)
-                        .WithMany("OrderItems")
-                        .HasForeignKey("ProductListId1");
 
                     b.Navigation("Owner");
 

@@ -10,7 +10,6 @@ namespace GroupBuyHelper.Data
         public int? Amount { get; set; }
         public string Description { get; set; }
 
-        public int ProductListId { get; set; }
         public ProductList ProductList { get; set; }
         
         public ICollection<UserOrderItem> ConnectedOrderItems { get; set; }

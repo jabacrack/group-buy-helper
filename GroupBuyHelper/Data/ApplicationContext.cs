@@ -22,24 +22,23 @@ namespace GroupBuyHelper.Data
             base.OnModelCreating(builder);
 
             builder.Entity<ProductList>()
-                .HasMany<Product>()
+                .HasMany(x => x.Products)
                 .WithOne(x => x.ProductList)
-                .HasForeignKey(x => x.ProductListId)
                 .OnDelete(DeleteBehavior.Cascade);
-
+            
             builder.Entity<ProductList>()
-                .HasMany<UserOrderItem>()
+                .HasMany(x => x.OrderItems)
                 .WithOne(x => x.ProductList)
                 .HasForeignKey(x => x.ProductListId)
                 .OnDelete(DeleteBehavior.Cascade);
-
+            
             builder.Entity<ApplicationUser>()
-                .HasMany<UserOrderItem>()
+                .HasMany(x => x.Orders)
                 .WithOne(x => x.Owner)
                 .OnDelete(DeleteBehavior.Cascade);
-
+            
             builder.Entity<Product>()
-                .HasMany<UserOrderItem>()
+                .HasMany(x => x.ConnectedOrderItems)
                 .WithOne(x => x.Product)
                 .HasForeignKey(x => x.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
