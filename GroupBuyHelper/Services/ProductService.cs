@@ -109,7 +109,5 @@ namespace GroupBuyHelper.Services
             Dictionary<int, int> orderData = await applicationContext.UserOrderItems.Where(i => i.ProductListId == productListId && i.Owner == user).ToDictionaryAsync(x => x.ProductId, x => x.Amount);
             return orderData;
         }
-
-        
     }
 }
