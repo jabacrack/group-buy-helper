@@ -9,45 +9,58 @@
 
 <h3>Все заказы</h3>
 
-<button class="btn btn-primary"
-        @onclick="OpenPopup">
-    Add New Forecast
-</button>
-
-@if (showPopup)
+@if (isDeleteDialogVisible)
 {
-    <!-- This is the popup to create or edit a forecast -->
-    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+<div class="modal" tabindex="-1" style="display: block">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Edit Forecast</h3>
-                    <!-- Button to close the popup -->
-                    <button type="button" class="close" @onclick="ClosePopup">
-                        <span aria-hidden="true">X</span>
-                    </button>
+                    <h5 class="modal-title">Delete order</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" @onclick="CloseDeleteDialog" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    @* <input class="form-control" type="text" *@
-                    @*        placeholder="Celsius forecast" *@
-                    @*        @bind="objWeatherForecast.TemperatureC" /> *@
-                    @* <input class="form-control" type="text" *@
-                    @*        placeholder="Fahrenheit forecast" *@
-                    @*        @bind="objWeatherForecast.TemperatureF" /> *@
-                    @* <input class="form-control" type="text" *@
-                    @*        placeholder="Summary" *@
-                    @*        @bind="objWeatherForecast.Summary" /> *@
-                    @* <br /> *@
-                    @* <!-- Button to save the forecast --> *@
-                    @* <button class="btn btn-primary" *@
-                    @*         @onclick="SaveForecast"> *@
-                    @*     Save *@
-                    @* </button> *@
+                    <p>Вы действительно хотите удалить "@deletingListName" и все пользовательские заказы? Их нельзя будет восстановить.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">Удалить</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDeleteDialog">Отмена</button>
                 </div>
             </div>
         </div>
     </div>
 }
+
+@* <div class="modal" tabindex="-1" style="display:block" role="dialog"> *@
+@*     <div class="modal-dialog"> *@
+@*         <div class="modal-content"> *@
+@*             <div class="modal-header"> *@
+@*                 <h3 class="modal-title">Edit Forecast</h3> *@
+@*                 <!-- Button to close the popup --> *@
+@*                 <button type="button" class="close"> *@
+@*                     <span aria-hidden="true">X</span> *@
+@*                 </button> *@
+@*             </div> *@
+@*             <div class="modal-body"> *@
+@*                 $1$ <input class="form-control" type="text" #1# *@
+@*                 $1$        placeholder="Celsius forecast" #1# *@
+@*                 $1$        @bind="objWeatherForecast.TemperatureC" /> #1# *@
+@*                 $1$ <input class="form-control" type="text" #1# *@
+@*                 $1$        placeholder="Fahrenheit forecast" #1# *@
+@*                 $1$        @bind="objWeatherForecast.TemperatureF" /> #1# *@
+@*                 $1$ <input class="form-control" type="text" #1# *@
+@*                 $1$        placeholder="Summary" #1# *@
+@*                 $1$        @bind="objWeatherForecast.Summary" /> #1# *@
+@*                 $1$ <br /> #1# *@
+@*                 $1$ <!-- Button to save the forecast --> #1# *@
+@*                 $1$ <button class="btn btn-primary" #1# *@
+@*                 $1$         @onclick="SaveForecast"> #1# *@
+@*                 $1$     Save #1# *@
+@*                 $1$ </button> #1# *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
 
 <div class="d-flex flex-column">
     @foreach (var list in lists)
@@ -62,10 +75,10 @@
         <NavLink class="nav-link" href="@linkTotal">
             Общее количество
         </NavLink>
-        
+
         @if (list.OwnerId == currentUserId)
         {
-            <button class="btn btn-danger" @onclick="@(async () => await productService.DeleteList(list.Id))">Удалить</button>
+            <button class="btn btn-danger btn-sm" @onclick="() => DeleteList(list.Id, list.Name)"><span aria-hidden="true">&times;</span></button>
         }
     </div>
     }
@@ -73,26 +86,53 @@
 
 @code {
 
-    bool showPopup = false;
-    void OpenPopup()
-    {
-        // Open the Popup
-        showPopup = true;
-    }
-
-    void ClosePopup()
-    {
-        // Open the Popup
-        showPopup = false;
-    }
-
     private ProductListInfo[] lists;
     private string currentUserId;
+    bool isDeleteDialogVisible = false;
+    int deletingListId = -1;
+    string deletingListName = "";
 
     protected override async Task OnInitializedAsync()
     {
         var currentUser = await userService.GetCurrentUser();
         currentUserId = currentUser.Id;
+        await UpdateLists();
+    }
+
+    async Task UpdateLists()
+    {
         lists = await productService.GetAllProductLists();
+    }
+
+    //TODO all this is awful make component for dialog
+    void DeleteList(int listId, string listName)
+    {
+        deletingListName = listName;
+        deletingListId = listId;
+        ShowDeleteDialog();
+    }
+
+    void ShowDeleteDialog()
+    {
+        isDeleteDialogVisible = true;
+    }
+
+    void CloseDeleteDialog()
+    {
+        isDeleteDialogVisible = false;
+        ResetDialogStatus();
+    }
+
+    async Task ConfirmDelete()
+    {
+        await productService.DeleteList(deletingListId);
+        CloseDeleteDialog();
+        await UpdateLists();
+    }
+
+    void ResetDialogStatus()
+    {
+        deletingListId = -1;
+        deletingListName = "";
     }
 }
